@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { X, Lock, Users, CheckCircle2, XCircle, Plus, Trash2, Download, Copy, Check, Share2, FileText } from 'lucide-react';
 
-export default function AdminModal({ isOpen, onClose, guests, onUpdate, onAdd, onDelete, onBatch, onReset, event }) {
+export default function AdminModal({ isOpen, onClose, guests, onUpdate, onAdd, onDelete, onBatch, onReset, onClearAll, event }) {
   const [auth, setAuth] = useState(false);
   const [pw, setPw] = useState('');
   const [err, setErr] = useState(false);
@@ -18,7 +18,7 @@ export default function AdminModal({ isOpen, onClose, guests, onUpdate, onAdd, o
 
   const login = (e) => {
     e.preventDefault();
-    if (pw.trim().toLowerCase() === (event.password || 'zoe').toLowerCase()) { setAuth(true); setErr(false); }
+    if (pw.trim().toLowerCase() === (event.password || '2905').toLowerCase()) { setAuth(true); setErr(false); }
     else setErr(true);
   };
 
@@ -46,6 +46,13 @@ export default function AdminModal({ isOpen, onClose, guests, onUpdate, onAdd, o
     setTab('list');
   };
 
+  const clearAll = () => {
+    if (window.confirm('Tem certeza que deseja zerar e limpar todos os convidados da lista?')) {
+      if (onClearAll) onClearAll();
+      else if (onReset) onReset([]);
+    }
+  };
+
   const exportCsv = () => {
     const rows = [['Nome', 'Grupo', 'Status', 'Adultos', 'Crianças', 'Obs', 'Mensagem'].join(';')];
     guests.forEach(g => rows.push([`"${g.name}"`, `"${g.group}"`, g.status === 'confirmed' ? 'Confirmado' : g.status === 'declined' ? 'Recusado' : 'Pendente', g.adults || 0, g.kids || 0, `"${g.diet || ''}"`, `"${g.msg || ''}"`].join(';')));
@@ -67,7 +74,7 @@ export default function AdminModal({ isOpen, onClose, guests, onUpdate, onAdd, o
     setTimeout(() => setCopied(false), 2500);
   };
 
-  const shareMsg = `Olá! Você é nosso convidado especial para o *1º Aninho da Zoe*! 🎂✨\n\n📅 ${event.date} às ${event.time}\n📍 ${event.venue}\n\nConfirme sua presença:\n👉 ${window.location.origin}\n\nEsperamos você com carinho! ❤️`;
+  const shareMsg = `Olá! Você é nosso convidado especial para o *1º Aninho da Zoe*! 🎂✨\n\n📅 ${event.date} às ${event.time}\n📍 ${event.venue}\n\nConfirme sua presença:\n👉 ${typeof window !== 'undefined' && window.location.origin.includes('vercel.app') ? window.location.origin : 'https://zoe1ano.vercel.app'}\n\nEsperamos você com carinho! ❤️`;
   const copyShare = () => { navigator.clipboard.writeText(shareMsg); setCopiedShare(true); setTimeout(() => setCopiedShare(false), 2500); };
 
   return (
@@ -86,7 +93,7 @@ export default function AdminModal({ isOpen, onClose, guests, onUpdate, onAdd, o
               <div className="field">
                 <input type="password" placeholder="Senha" value={pw} onChange={e => setPw(e.target.value)} autoFocus style={{ textAlign: 'center' }} />
               </div>
-              {err && <p style={{ color: 'var(--red)', fontSize: 13, marginBottom: 10 }}>Senha incorreta. Dica: <strong>zoe</strong></p>}
+              {err && <p style={{ color: 'var(--red)', fontSize: 13, marginBottom: 10 }}>Senha incorreta.</p>}
               <button type="submit" className="btn btn-gold btn-block">Entrar</button>
             </form>
           </div>
@@ -120,12 +127,17 @@ export default function AdminModal({ isOpen, onClose, guests, onUpdate, onAdd, o
                 </div>
 
                 <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8, marginBottom: 14 }}>
-                  <div style={{ display: 'flex', gap: 6 }}>
+                  <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
                     <button onClick={copyWa} className="btn btn-outline btn-sm">
                       {copied ? <Check size={13} style={{ color: 'var(--green)' }} /> : <Copy size={13} />}
                       {copied ? 'Copiado!' : 'Resumo WhatsApp'}
                     </button>
                     <button onClick={exportCsv} className="btn btn-outline btn-sm"><Download size={13} /> CSV</button>
+                    {guests.length > 0 && (
+                      <button onClick={clearAll} className="btn btn-outline btn-sm" style={{ color: 'var(--red)' }} title="Zerar lista inteira">
+                        <Trash2 size={13} /> Limpar Tudo
+                      </button>
+                    )}
                   </div>
                   <div style={{ display: 'flex', gap: 4 }}>
                     {['all', 'confirmed', 'declined', 'pending'].map(s => (
@@ -149,27 +161,35 @@ export default function AdminModal({ isOpen, onClose, guests, onUpdate, onAdd, o
                   <table className="tbl">
                     <thead><tr style={{ background: 'var(--bg)' }}><th>Nome</th><th>Grupo</th><th>Status</th><th>Qt.</th><th>Obs</th><th></th></tr></thead>
                     <tbody>
-                      {shown.map(g => (
-                        <tr key={g.id}>
-                          <td><strong>{g.name}</strong></td>
-                          <td><span className="badge">{g.group}</span></td>
-                          <td><span className={`pill ${g.status === 'confirmed' ? 'pill-ok' : g.status === 'declined' ? 'pill-no' : 'pill-wait'}`}>
-                            {g.status === 'confirmed' ? '✅' : g.status === 'declined' ? '❌' : '⏳'}
-                          </span></td>
-                          <td>{g.status === 'confirmed' ? <span>{g.adults}A{g.kids > 0 ? ` +${g.kids}C` : ''}</span> : '—'}</td>
-                          <td style={{ maxWidth: 140, fontSize: 12, color: 'var(--text-secondary)' }}>
-                            {g.diet && <span>🍴 {g.diet} </span>}
-                            {g.msg && <span style={{ fontStyle: 'italic' }}>💬 {g.msg.slice(0, 40)}{g.msg.length > 40 ? '...' : ''}</span>}
-                          </td>
-                          <td>
-                            <div style={{ display: 'flex', gap: 2 }}>
-                              <button title="Confirmar" onClick={() => onUpdate({ ...g, status: 'confirmed', adults: g.adults || 1 })} style={{ border: 'none', background: 'none', cursor: 'pointer', color: 'var(--green)', padding: 2 }}><CheckCircle2 size={15} /></button>
-                              <button title="Recusar" onClick={() => onUpdate({ ...g, status: 'declined', adults: 0, kids: 0 })} style={{ border: 'none', background: 'none', cursor: 'pointer', color: 'var(--red)', padding: 2 }}><XCircle size={15} /></button>
-                              <button title="Excluir" onClick={() => { if (confirm(`Remover "${g.name}"?`)) onDelete(g.id); }} style={{ border: 'none', background: 'none', cursor: 'pointer', color: 'var(--text-tertiary)', padding: 2 }}><Trash2 size={15} /></button>
-                            </div>
+                      {shown.length > 0 ? (
+                        shown.map(g => (
+                          <tr key={g.id}>
+                            <td><strong>{g.name}</strong></td>
+                            <td><span className="badge">{g.group}</span></td>
+                            <td><span className={`pill ${g.status === 'confirmed' ? 'pill-ok' : g.status === 'declined' ? 'pill-no' : 'pill-wait'}`}>
+                              {g.status === 'confirmed' ? '✅' : g.status === 'declined' ? '❌' : '⏳'}
+                            </span></td>
+                            <td>{g.status === 'confirmed' ? <span>{g.adults}A{g.kids > 0 ? ` +${g.kids}C` : ''}</span> : '—'}</td>
+                            <td style={{ maxWidth: 140, fontSize: 12, color: 'var(--text-secondary)' }}>
+                              {g.diet && <span>🍴 {g.diet} </span>}
+                              {g.msg && <span style={{ fontStyle: 'italic' }}>💬 {g.msg.slice(0, 40)}{g.msg.length > 40 ? '...' : ''}</span>}
+                            </td>
+                            <td>
+                              <div style={{ display: 'flex', gap: 2 }}>
+                                <button title="Confirmar" onClick={() => onUpdate({ ...g, status: 'confirmed', adults: g.adults || 1 })} style={{ border: 'none', background: 'none', cursor: 'pointer', color: 'var(--green)', padding: 2 }}><CheckCircle2 size={15} /></button>
+                                <button title="Recusar" onClick={() => onUpdate({ ...g, status: 'declined', adults: 0, kids: 0 })} style={{ border: 'none', background: 'none', cursor: 'pointer', color: 'var(--red)', padding: 2 }}><XCircle size={15} /></button>
+                                <button title="Excluir" onClick={() => { if (confirm(`Remover "${g.name}"?`)) onDelete(g.id); }} style={{ border: 'none', background: 'none', cursor: 'pointer', color: 'var(--text-tertiary)', padding: 2 }}><Trash2 size={15} /></button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))
+                      ) : (
+                        <tr>
+                          <td colSpan={6} style={{ textAlign: 'center', padding: '24px 16px', color: 'var(--text-secondary)', fontSize: 13 }}>
+                            Nenhum convidado na lista. Adicione acima ou use a aba <strong>"Importar"</strong> para colar sua lista inteira!
                           </td>
                         </tr>
-                      ))}
+                      )}
                     </tbody>
                   </table>
                 </div>

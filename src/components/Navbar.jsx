@@ -7,6 +7,7 @@ export default function Navbar({ onAdmin }) {
       <a href="#hero" className="nav-brand">Zoe</a>
       <a href="#detalhes" className="nav-link nav-hide">Detalhes</a>
       <a href="#confirmar" className="nav-link" style={{ color: 'var(--gold-dark)', fontWeight: 600 }}>Confirmar</a>
+      <a href="#presentes" className="nav-link nav-hide">Presentes</a>
       <button onClick={onAdmin} className="btn btn-outline btn-sm" style={{ marginLeft: 4, gap: 5 }}>
         <Shield size={13} />
         <span className="nav-hide">Painel</span>

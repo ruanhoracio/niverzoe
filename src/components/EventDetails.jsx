@@ -1,5 +1,5 @@
 import React from 'react';
-import { Calendar, MapPin, Shirt, CalendarPlus, Navigation } from 'lucide-react';
+import { Calendar, MapPin, CalendarPlus, Navigation } from 'lucide-react';
 
 export default function EventDetails({ event }) {
   const gcalUrl = () => {
@@ -27,7 +27,7 @@ export default function EventDetails({ event }) {
   return (
     <section className="section" id="detalhes" style={{ background: 'var(--bg-alt)' }}>
       <div className="wrap">
-        <div style={{ textAlign: 'center', maxWidth: 520, margin: '0 auto 48px' }}>
+        <div style={{ textAlign: 'center', maxWidth: 520, margin: '0 auto 40px' }}>
           <div className="section-label">Informações</div>
           <h2 className="section-title">Detalhes do Evento</h2>
           <p className="section-desc">
@@ -35,7 +35,7 @@ export default function EventDetails({ event }) {
           </p>
         </div>
 
-        <div className="detail-grid">
+        <div className="detail-grid" style={{ maxWidth: 720, margin: '0 auto' }}>
           {/* Date */}
           <div className="detail-card">
             <div className="detail-icon"><Calendar size={22} /></div>
@@ -44,7 +44,7 @@ export default function EventDetails({ event }) {
               <strong style={{ color: 'var(--text)', fontSize: 15 }}>{event.date}</strong><br />
               A partir das {event.time}
             </p>
-            <div style={{ display: 'flex', gap: 8, width: '100%' }}>
+            <div style={{ display: 'flex', gap: 8, width: '100%', marginTop: 'auto' }}>
               <a href={gcalUrl()} target="_blank" rel="noopener" className="btn btn-outline btn-sm" style={{ flex: 1, fontSize: 12 }}>
                 <CalendarPlus size={13} /> Google
               </a>
@@ -62,22 +62,9 @@ export default function EventDetails({ event }) {
               <strong style={{ color: 'var(--text)', fontSize: 15 }}>{event.venue}</strong><br />
               {event.address}
             </p>
-            <a href={event.mapUrl} target="_blank" rel="noopener" className="btn btn-gold btn-sm btn-block" style={{ fontSize: 13 }}>
+            <a href={event.mapUrl} target="_blank" rel="noopener" className="btn btn-gold btn-sm btn-block" style={{ fontSize: 13, marginTop: 'auto' }}>
               <Navigation size={13} /> Abrir no Maps
             </a>
-          </div>
-
-          {/* Dress */}
-          <div className="detail-card">
-            <div className="detail-icon"><Shirt size={22} /></div>
-            <h3>Traje Sugerido</h3>
-            <p>
-              <strong style={{ color: 'var(--text)', fontSize: 15 }}>{event.dress}</strong><br />
-              Venha confortável para brincar e tirar muitas fotos!
-            </p>
-            <div style={{ padding: '6px 14px', background: 'var(--gold-bg)', borderRadius: 'var(--r-full)', fontSize: 12, color: 'var(--gold-dark)', fontWeight: 500 }}>
-              ✨ Muita diversão para os pequenos
-            </div>
           </div>
         </div>
       </div>
