@@ -175,9 +175,9 @@ export default function RsvpSection({ guests, onUpdate }) {
                   <div className="field">
                     <label style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
                       <MessageSquare size={13} style={{ color: 'var(--gold)' }} />
-                      Mensagem para a Zoe (opcional)
+                      Alguma observação? (opcional)
                     </label>
-                    <textarea rows={3} placeholder="Seus votos de amor e carinho para o primeiro aninho da Zoe..." value={msg} onChange={(e) => setMsg(e.target.value)} />
+                    <textarea rows={3} placeholder="Ex: Meu filho não poderá ir, chegaremos um pouco mais tarde, etc..." value={msg} onChange={(e) => setMsg(e.target.value)} />
                   </div>
 
                   <button type="submit" className="btn btn-gold btn-block btn-lg" style={{ marginTop: 8 }}>
