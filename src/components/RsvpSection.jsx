@@ -253,12 +253,9 @@ export default function RsvpSection({ guests, onUpdate, onUpdateMultiple }) {
                     {open && q.trim() && (
                       <div className="dropdown fade-up">
                         {filtered.length > 0 ? filtered.map(g => (
-                          <div key={g.id} className="dropdown-row" onClick={() => pick(g)}>
-                            <div>
-                              <div style={{ fontWeight: 600, fontSize: 14 }}>{g.name}</div>
-                              <div style={{ fontSize: 12, color: 'var(--text-tertiary)' }}>
-                                {g.status === 'confirmed' ? '✅ Já confirmado' : g.status === 'declined' ? '❌ Recusou' : '⏳ Pendente'}
-                              </div>
+                          <div key={g.id} className="dropdown-row" onClick={() => pick(g)} style={{ padding: '12px 16px' }}>
+                            <div style={{ fontWeight: 600, fontSize: 14.5, color: 'var(--text)' }}>
+                              {g.name}
                             </div>
                           </div>
                         )) : (
@@ -338,11 +335,6 @@ export default function RsvpSection({ guests, onUpdate, onUpdateMultiple }) {
                                         {m.name}
                                       </span>
                                     </div>
-                                    {m.status === 'confirmed' && (
-                                      <span style={{ fontSize: 11, color: 'var(--green)', fontWeight: 500 }}>
-                                        Confirmado
-                                      </span>
-                                    )}
                                   </label>
                                 );
                               })}
