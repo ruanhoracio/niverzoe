@@ -9,10 +9,16 @@ export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 export const mapRowToGuest = (row) => ({
   id: row.id,
   name: row.name,
-  group: row.group_name || row.group || 'Família',
+  tipo: row.tipo || 'Individual',
+  group: row.group_name || row.group || 'Geral',
   status: row.status || 'pending',
   adults: row.adults ?? 1,
   kids: row.kids ?? 0,
+  kidsFree: row.kids_free ?? row.kidsFree ?? 0,
+  kidsPaying: row.kids_paying ?? row.kidsPaying ?? 0,
+  isPaying: row.is_paying ?? row.isPaying ?? ((row.adults ?? 1) > 0 || (row.kids_paying ?? 0) > 0),
+  totalPaying: row.total_paying ?? row.totalPaying ?? ((row.adults ?? 1) + (row.kids_paying ?? 0)),
+  totalGuests: row.total_guests ?? row.totalGuests ?? ((row.adults ?? 1) + (row.kids ?? 0)),
   diet: row.diet || '',
   msg: row.msg || '',
   updatedAt: row.updated_at || row.created_at
@@ -24,8 +30,8 @@ export const mapGuestToRow = (g) => ({
   name: g.name,
   group_name: g.group || 'Convidados',
   status: g.status || 'pending',
-  adults: Number(g.adults) || 1,
-  kids: Number(g.kids) || 0,
+  adults: Number(g.adults) ?? 1,
+  kids: Number(g.kids) ?? 0,
   diet: g.diet || '',
   msg: g.msg || '',
   updated_at: new Date().toISOString()
