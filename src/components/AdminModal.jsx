@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Lock, Users, CheckCircle2, XCircle, Plus, Trash2, Download, Copy, Check, Share2, FileText, Edit3, Save } from 'lucide-react';
+import { X, Lock, Users, CheckCircle2, XCircle, Plus, Trash2, Download, Copy, Check, Share2, FileText, Edit3, Save, UserPlus, Filter } from 'lucide-react';
 
 export default function AdminModal({ isOpen, onClose, guests, onUpdate, onAdd, onDelete, onBatch, onReset, onClearAll, event }) {
   const [auth, setAuth] = useState(false);
@@ -8,6 +8,8 @@ export default function AdminModal({ isOpen, onClose, guests, onUpdate, onAdd, o
   const [tab, setTab] = useState('list');
   const [filter, setFilter] = useState('all');
   const [groupFilter, setGroupFilter] = useState('all');
+  const [payingFilter, setPayingFilter] = useState('all');
+  const [showAddForm, setShowAddForm] = useState(false);
   const [name, setName] = useState('');
   const [group, setGroup] = useState('Família materna');
   const [tipo, setTipo] = useState('Individual');
@@ -45,10 +47,15 @@ export default function AdminModal({ isOpen, onClose, guests, onUpdate, onAdd, o
   // Grupos únicos para filtro
   const availableGroups = ['all', ...Array.from(new Set(guests.map(g => g.group).filter(Boolean)))];
 
+  // Filtro completo da tabela
   const shown = guests.filter(g => {
+    const isFreeKid = g.isPaying === false || g.kidsFree > 0;
     const statusMatch = filter === 'all' || g.status === filter;
     const groupMatch = groupFilter === 'all' || g.group === groupFilter;
-    return statusMatch && groupMatch;
+    const payingMatch = payingFilter === 'all' 
+      ? true 
+      : (payingFilter === 'paying' ? !isFreeKid : isFreeKid);
+    return statusMatch && groupMatch && payingMatch;
   });
 
   // Alternar rapidamente entre Pagante e Isento (<2 anos) com um clique na tabela
@@ -100,6 +107,7 @@ export default function AdminModal({ isOpen, onClose, guests, onUpdate, onAdd, o
     };
     onAdd(newGuest);
     setName('');
+    setShowAddForm(false);
   };
 
   const doBatch = () => {
@@ -259,14 +267,17 @@ export default function AdminModal({ isOpen, onClose, guests, onUpdate, onAdd, o
                   </div>
                 </div>
 
-                {/* ─── Barra de Ações & Filtros ─── */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8, marginBottom: 14 }}>
+                {/* ─── Barra de Ações & Filtros Funcionais ─── */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: 10, marginBottom: 16 }}>
                   <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
                     <button onClick={copyWa} className="btn btn-outline btn-sm">
                       {copied ? <Check size={13} style={{ color: 'var(--green)' }} /> : <Copy size={13} />}
                       {copied ? 'Copiado!' : 'Relatório WhatsApp'}
                     </button>
                     <button onClick={exportCsv} className="btn btn-outline btn-sm"><Download size={13} /> Exportar Planilha</button>
+                    <button onClick={() => setShowAddForm(!showAddForm)} className="btn btn-gold btn-sm">
+                      <Plus size={13} /> Novo Convidado
+                    </button>
                     {guests.length > 0 && (
                       <button onClick={clearAll} className="btn btn-outline btn-sm" style={{ color: 'var(--red)' }} title="Zerar lista inteira">
                         <Trash2 size={13} /> Limpar Tudo
@@ -274,51 +285,70 @@ export default function AdminModal({ isOpen, onClose, guests, onUpdate, onAdd, o
                     )}
                   </div>
 
-                  <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                  {/* Filtros em Tempo Real */}
+                  <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center' }}>
                     {/* Filtro de Categoria */}
                     <select 
                       value={groupFilter} 
                       onChange={e => setGroupFilter(e.target.value)}
-                      style={{ padding: '4px 10px', borderRadius: 'var(--r-full)', border: '1px solid var(--border)', background: '#fff', fontSize: 12, color: 'var(--text)' }}
+                      style={{ padding: '6px 12px', borderRadius: 'var(--r-full)', border: '1px solid var(--border)', background: '#fff', fontSize: 12, color: 'var(--text)' }}
                     >
                       {availableGroups.map(g => (
                         <option key={g} value={g}>{g === 'all' ? 'Todas Categorias' : g}</option>
                       ))}
                     </select>
 
+                    {/* Filtro de Pagante / Isento (Agora 100% Funcional!) */}
+                    <select 
+                      value={payingFilter} 
+                      onChange={e => setPayingFilter(e.target.value)}
+                      style={{ padding: '6px 12px', borderRadius: 'var(--r-full)', border: '1.5px solid var(--gold)', background: '#fff', fontSize: 12, color: 'var(--text)', fontWeight: 600 }}
+                    >
+                      <option value="all">Todos (Pagantes & Isentos)</option>
+                      <option value="paying">Apenas Pagantes 💳</option>
+                      <option value="free">Apenas Isentos (&lt; 2a) 👶</option>
+                    </select>
+
                     {/* Filtro de Status */}
                     {['all', 'confirmed', 'declined', 'pending'].map(s => (
                       <button key={s} onClick={() => setFilter(s)}
-                        style={{ padding: '3px 10px', borderRadius: 'var(--r-full)', border: '1px solid var(--border)', background: filter === s ? 'var(--text)' : 'var(--bg)', color: filter === s ? '#fff' : 'var(--text-secondary)', fontSize: 12, cursor: 'pointer', fontWeight: 500 }}>
+                        style={{ padding: '4px 10px', borderRadius: 'var(--r-full)', border: '1px solid var(--border)', background: filter === s ? 'var(--text)' : 'var(--bg)', color: filter === s ? '#fff' : 'var(--text-secondary)', fontSize: 12, cursor: 'pointer', fontWeight: 500 }}>
                         {s === 'all' ? 'Todos' : s === 'confirmed' ? '✅' : s === 'declined' ? '❌' : '⏳'}
                       </button>
                     ))}
                   </div>
                 </div>
 
-                {/* ─── Adicionar Convidado Manual ─── */}
-                <form onSubmit={addOne} style={{ display: 'flex', gap: 6, marginBottom: 14, flexWrap: 'wrap' }}>
-                  <input className="search-input" style={{ flex: 3, minWidth: 160, paddingLeft: 14 }} placeholder="Nome completo do convidado..." value={name} onChange={e => setName(e.target.value)} />
-                  <select style={{ flex: 1.5, minWidth: 110, padding: '8px 12px', border: '1px solid var(--border)', borderRadius: 'var(--r-full)', fontSize: 13, background: '#fff', fontFamily: 'var(--sans)' }} value={group} onChange={e => setGroup(e.target.value)}>
-                    <option>Família materna</option>
-                    <option>Família paterna</option>
-                    <option>Padrinhos</option>
-                    <option>Igreja</option>
-                    <option>Trabalho</option>
-                    <option>Amigos</option>
-                    <option>Outros</option>
-                  </select>
-                  <select style={{ flex: 1, minWidth: 90, padding: '8px 12px', border: '1px solid var(--border)', borderRadius: 'var(--r-full)', fontSize: 13, background: '#fff', fontFamily: 'var(--sans)' }} value={tipo} onChange={e => setTipo(e.target.value)}>
-                    <option>Individual</option>
-                    <option>Casal</option>
-                    <option>Família</option>
-                  </select>
-                  <select style={{ flex: 1.2, minWidth: 100, padding: '8px 12px', border: '1px solid var(--border)', borderRadius: 'var(--r-full)', fontSize: 13, background: '#fff', fontFamily: 'var(--sans)' }} value={isAdult ? 'adult' : 'kid'} onChange={e => setIsAdult(e.target.value === 'adult')}>
-                    <option value="adult">Adulto / Pagante</option>
-                    <option value="kid">Criança &lt; 2a (Isenta)</option>
-                  </select>
-                  <button type="submit" className="btn btn-gold btn-sm"><Plus size={13} /> Adicionar</button>
-                </form>
+                {/* ─── Formulário Expansível de Adicionar Convidado ─── */}
+                {showAddForm && (
+                  <form onSubmit={addOne} className="fade-up" style={{ background: 'var(--bg)', border: '1.5px solid var(--gold)', borderRadius: 'var(--r-m)', padding: 16, marginBottom: 16 }}>
+                    <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--gold-dark)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 10 }}>
+                      + Cadastrar Novo Convidado
+                    </div>
+                    <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                      <input className="search-input" style={{ flex: 3, minWidth: 160, paddingLeft: 14 }} placeholder="Nome completo do convidado..." value={name} onChange={e => setName(e.target.value)} required />
+                      <select style={{ flex: 1.5, minWidth: 110, padding: '8px 12px', border: '1px solid var(--border)', borderRadius: 'var(--r-full)', fontSize: 13, background: '#fff' }} value={group} onChange={e => setGroup(e.target.value)}>
+                        <option>Família materna</option>
+                        <option>Família paterna</option>
+                        <option>Padrinhos</option>
+                        <option>Igreja</option>
+                        <option>Trabalho</option>
+                        <option>Amigos</option>
+                        <option>Outros</option>
+                      </select>
+                      <select style={{ flex: 1, minWidth: 90, padding: '8px 12px', border: '1px solid var(--border)', borderRadius: 'var(--r-full)', fontSize: 13, background: '#fff' }} value={tipo} onChange={e => setTipo(e.target.value)}>
+                        <option>Individual</option>
+                        <option>Casal</option>
+                        <option>Família</option>
+                      </select>
+                      <select style={{ flex: 1.5, minWidth: 130, padding: '8px 12px', border: '1px solid var(--border)', borderRadius: 'var(--r-full)', fontSize: 13, background: '#fff' }} value={isAdult ? 'adult' : 'kid'} onChange={e => setIsAdult(e.target.value === 'adult')}>
+                        <option value="adult">Adulto / Pagante 💳</option>
+                        <option value="kid">Criança &lt; 2a (Isenta) 👶</option>
+                      </select>
+                      <button type="submit" className="btn btn-gold btn-sm"><Plus size={13} /> Salvar Convidado</button>
+                    </div>
+                  </form>
+                )}
 
                 {/* ─── Tabela Oficial de Convidados com Edição Rápida e Direta ─── */}
                 <div style={{ overflowX: 'auto', maxHeight: 380, border: '1px solid var(--border)', borderRadius: 'var(--r-m)' }}>
