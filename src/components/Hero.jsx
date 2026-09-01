@@ -43,7 +43,7 @@ export default function Hero({ event }) {
           </span>
           <span className="hero-meta-item">
             <Clock size={15} />
-            Às {event.time}
+            {event.time}
           </span>
           <span className="hero-meta-item">
             <MapPin size={15} />

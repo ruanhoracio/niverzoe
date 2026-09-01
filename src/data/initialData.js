@@ -4,7 +4,7 @@ export const EVENT = {
   title: "Zoe faz 1 aninho",
   subtitle: "O nosso maior amor completa seu primeiro aninho.",
   date: "15 de Novembro de 2026",
-  time: "15:30",
+  time: "15:30 às 19:30",
   iso: "2026-11-15T15:30:00-03:00",
   venue: "Espaço Be Happy",
   address: "Buffet Infantil Be Happy",
