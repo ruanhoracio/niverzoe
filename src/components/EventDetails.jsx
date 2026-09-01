@@ -25,8 +25,9 @@ export default function EventDetails({ event }) {
   };
 
   return (
-    <section className="section" id="detalhes" style={{ background: 'var(--bg-alt)' }}>
-      <div className="wrap">
+    <section className="section event-details-section" id="detalhes">
+      <div className="venue-bg-layer" />
+      <div className="wrap" style={{ position: 'relative', zIndex: 2 }}>
         <div style={{ textAlign: 'center', maxWidth: 520, margin: '0 auto 40px' }}>
           <div className="section-label">Informações</div>
           <h2 className="section-title">Detalhes do Evento</h2>
