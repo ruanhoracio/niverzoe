@@ -36,7 +36,7 @@ export default function GiftSection() {
           </p>
         </div>
 
-        <div className="detail-grid" style={{ maxWidth: 840, margin: '0 auto' }}>
+        <div className="gifts-grid">
           {items.map((item, idx) => {
             const isPix = item.category.includes('PIX') || item.icon === 'HeartHandshake';
 

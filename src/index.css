@@ -371,6 +371,31 @@ button { font-family: inherit; cursor: pointer; }
 .detail-card h3 { font-size: 1.15rem; }
 .detail-card p { font-size: 14px; color: var(--text-secondary); line-height: 1.5; }
 
+/* ─── Gifts Grid (4 cards in 1 line on desktop) ─── */
+.gifts-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  max-width: 1080px;
+  margin: 0 auto;
+}
+.gifts-grid .detail-card {
+  padding: 24px 16px;
+  height: 100%;
+}
+@media (max-width: 960px) {
+  .gifts-grid {
+    grid-template-columns: repeat(2, 1fr);
+    max-width: 580px;
+  }
+}
+@media (max-width: 520px) {
+  .gifts-grid {
+    grid-template-columns: 1fr;
+    max-width: 100%;
+  }
+}
+
 /* ─── Gallery ─── */
 .gallery-masonry {
   columns: 3;
