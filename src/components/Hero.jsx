@@ -31,8 +31,7 @@ export default function Hero({ event }) {
         <div className="hero-eyebrow">Celebração Especial · {event.age}</div>
 
         <h1>
-          Zoe faz<br />
-          <em>1 aninho.</em>
+          Zoe faz <em>1 aninho.</em>
         </h1>
 
         <p className="hero-sub">{event.subtitle}</p>

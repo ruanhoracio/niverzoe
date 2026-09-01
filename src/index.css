@@ -183,7 +183,7 @@ button { font-family: inherit; cursor: pointer; }
   overflow: hidden;
 }
 .hero-top {
-  max-width: 620px;
+  max-width: 840px;
   margin: 0 auto;
   padding: 0 24px 48px;
 }
@@ -197,9 +197,11 @@ button { font-family: inherit; cursor: pointer; }
   margin-bottom: 20px;
 }
 .hero h1 {
-  font-size: clamp(2.6rem, 7vw, 4.2rem);
+  font-size: clamp(2.8rem, 8.5vw, 5rem);
   font-weight: 600;
-  margin-bottom: 8px;
+  margin-bottom: 14px;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
 }
 .hero h1 em {
   font-style: italic;
