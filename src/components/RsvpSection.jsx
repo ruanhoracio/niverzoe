@@ -6,28 +6,31 @@ export default function RsvpSection({ guests, onUpdate }) {
   const [q, setQ] = useState('');
   const [open, setOpen] = useState(false);
   const [guest, setGuest] = useState(null);
-  const [manual, setManual] = useState(false);
-  const [manualName, setManualName] = useState('');
   const [choice, setChoice] = useState('confirmed');
-  const [adults, setAdults] = useState(1);
-  const [kids, setKids] = useState(0);
-  const [diet, setDiet] = useState('');
   const [msg, setMsg] = useState('');
   const [done, setDone] = useState(false);
+  const [manual, setManual] = useState(false);
+  const [manualName, setManualName] = useState('');
 
-  const filtered = q.trim() ? guests.filter(g => g.name.toLowerCase().includes(q.toLowerCase())) : [];
+  const filtered = q.trim()
+    ? guests.filter(g => g.name.toLowerCase().includes(q.toLowerCase().trim()))
+    : [];
 
   const pick = (g) => {
-    setGuest(g); setQ(g.name); setOpen(false); setManual(false);
+    setGuest(g);
+    setManual(false);
     setChoice(g.status === 'declined' ? 'declined' : 'confirmed');
-    setAdults(g.adults || 1); setKids(g.kids || 0);
-    setDiet(g.diet || ''); setMsg(g.msg || '');
+    setMsg(g.msg || '');
+    setOpen(false);
   };
 
   const startManual = () => {
+    const newGuest = { id: 'manual_' + Date.now(), name: q.trim() || 'Novo Convidado', group: 'Outros', status: 'pending', adults: 1, kids: 0, diet: '', msg: '' };
+    setGuest(newGuest);
     setManual(true);
-    setGuest({ id: 'new_' + Date.now(), name: '', group: 'Convidado', status: 'pending' });
-    setChoice('confirmed'); setAdults(1); setKids(0); setOpen(false);
+    setManualName(q.trim());
+    setChoice('confirmed');
+    setOpen(false);
   };
 
   const boom = () => {
@@ -41,13 +44,14 @@ export default function RsvpSection({ guests, onUpdate }) {
   const submit = (e) => {
     e.preventDefault();
     if (!guest) return;
+    const finalName = manual ? (manualName.trim() || guest.name) : guest.name;
     const data = {
       ...guest,
-      name: manual ? manualName : guest.name,
+      name: finalName,
       status: choice,
-      adults: choice === 'confirmed' ? Number(adults) : 0,
-      kids: choice === 'confirmed' ? Number(kids) : 0,
-      diet: diet.trim(),
+      adults: choice === 'confirmed' ? (guest.adults ?? 1) : 0,
+      kids: choice === 'confirmed' ? (guest.kids ?? 0) : 0,
+      diet: '',
       msg: msg.trim(),
       updatedAt: new Date().toISOString()
     };
@@ -59,7 +63,7 @@ export default function RsvpSection({ guests, onUpdate }) {
 
   const reset = () => {
     setDone(false); setGuest(null); setQ(''); setManualName('');
-    setManual(false); setMsg(''); setDiet('');
+    setManual(false); setMsg('');
   };
 
   return (
@@ -86,13 +90,6 @@ export default function RsvpSection({ guests, onUpdate }) {
                   ? <>Que alegria, <strong>{guest?.name}</strong>! Estamos ansiosos para celebrar com você!</>
                   : <>Obrigado por nos avisar, <strong>{guest?.name}</strong>. Sentiremos sua falta!</>}
               </p>
-              {choice === 'confirmed' && (
-                <div style={{ background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 'var(--r-m)', padding: 14, maxWidth: 320, margin: '0 auto 20px', textAlign: 'left', fontSize: 14 }}>
-                  <div style={{ fontWeight: 600 }}>• Adultos: {adults}</div>
-                  {kids > 0 && <div style={{ fontWeight: 600 }}>• Crianças: {kids}</div>}
-                  {diet && <div style={{ color: 'var(--text-secondary)', fontSize: 13 }}>• {diet}</div>}
-                </div>
-              )}
               <div style={{ display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap' }}>
                 <a href="#detalhes" className="btn btn-outline btn-sm">Ver Local</a>
                 <button onClick={reset} className="btn btn-ghost btn-sm"><RotateCcw size={13} /> Alterar</button>
@@ -103,13 +100,13 @@ export default function RsvpSection({ guests, onUpdate }) {
               {!guest ? (
                 <div className="fade-up">
                   <label style={{ fontWeight: 500, fontSize: 14, marginBottom: 10, display: 'block' }}>
-                    Busque seu nome ou família:
+                    Busque seu nome:
                   </label>
                   <div className="search-wrap">
                     <Search className="search-icon" size={18} />
                     <input
                       className="search-input"
-                      placeholder="Digite seu nome ou família..."
+                      placeholder="Digite seu nome..."
                       value={q}
                       onChange={(e) => { setQ(e.target.value); setOpen(true); }}
                       onFocus={() => setOpen(true)}
@@ -124,7 +121,6 @@ export default function RsvpSection({ guests, onUpdate }) {
                                 {g.status === 'confirmed' ? '✅ Confirmado' : g.status === 'declined' ? '❌ Recusou' : '⏳ Pendente'}
                               </div>
                             </div>
-                            <span className="badge">{g.group}</span>
                           </div>
                         )) : (
                           <div style={{ padding: 16, textAlign: 'center' }}>
@@ -175,37 +171,6 @@ export default function RsvpSection({ guests, onUpdate }) {
                       </button>
                     </div>
                   </div>
-
-                  {choice === 'confirmed' && (
-                    <div className="fade-up">
-                      <div className="counter-row">
-                        <div>
-                          <div style={{ fontWeight: 500, fontSize: 14 }}>Adultos</div>
-                          <div style={{ fontSize: 12, color: 'var(--text-tertiary)' }}>Incluindo você</div>
-                        </div>
-                        <div className="counter-controls">
-                          <button type="button" className="counter-btn" onClick={() => setAdults(Math.max(1, adults - 1))} disabled={adults <= 1}>−</button>
-                          <span style={{ fontWeight: 600, fontSize: 16, minWidth: 20, textAlign: 'center' }}>{adults}</span>
-                          <button type="button" className="counter-btn" onClick={() => setAdults(adults + 1)}>+</button>
-                        </div>
-                      </div>
-                      <div className="counter-row">
-                        <div>
-                          <div style={{ fontWeight: 500, fontSize: 14 }}>Crianças</div>
-                          <div style={{ fontSize: 12, color: 'var(--text-tertiary)' }}>Até 10 anos</div>
-                        </div>
-                        <div className="counter-controls">
-                          <button type="button" className="counter-btn" onClick={() => setKids(Math.max(0, kids - 1))} disabled={kids <= 0}>−</button>
-                          <span style={{ fontWeight: 600, fontSize: 16, minWidth: 20, textAlign: 'center' }}>{kids}</span>
-                          <button type="button" className="counter-btn" onClick={() => setKids(kids + 1)}>+</button>
-                        </div>
-                      </div>
-                      <div className="field" style={{ marginTop: 16 }}>
-                        <label>Restrição alimentar ou observação? (opcional)</label>
-                        <input placeholder="Ex: Vegetariano, sem lactose..." value={diet} onChange={(e) => setDiet(e.target.value)} />
-                      </div>
-                    </div>
-                  )}
 
                   <div className="field">
                     <label style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
