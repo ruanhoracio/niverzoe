@@ -28,12 +28,13 @@ export default function GiftSection() {
   return (
     <section className="section" id="presentes" style={{ background: 'var(--bg-alt)' }}>
       <div className="wrap">
-        <div style={{ textAlign: 'center', maxWidth: 560, margin: '0 auto 40px' }}>
+        <div style={{ textAlign: 'center', maxWidth: 620, margin: '0 auto 40px' }}>
           <div className="section-label">Carinho & Mimos</div>
           <h2 className="section-title">Sugestão de Presentes</h2>
-          <p className="section-desc">
-            {intro}
-          </p>
+          <div className="section-desc" style={{ lineHeight: 1.7, marginTop: 12 }}>
+            <p style={{ marginBottom: 6 }}>A sua presença é o nosso maior e mais precioso presente.</p>
+            <p>Mas se desejar presentear a Zoe, aqui estão algumas referências e tamanhos:</p>
+          </div>
         </div>
 
         <div className="gifts-grid">

@@ -69,11 +69,19 @@ export default function RsvpSection({ guests, onUpdate }) {
   return (
     <section className="section" id="confirmar">
       <div className="wrap-sm">
-        <div style={{ textAlign: 'center', marginBottom: 40 }}>
+        <div style={{ textAlign: 'center', marginBottom: 40, maxWidth: 580, margin: '0 auto 40px' }}>
           <h2 className="section-title">Confirmação de Presença</h2>
-          <p className="section-desc">
-            As confirmações serão recebidas até 10 de outubro. Após essa data, não será possível incluir novas confirmações. Em caso de imprevisto, pedimos a gentileza de nos avisar.
-          </p>
+          <div style={{ fontSize: 14, lineHeight: 1.75, color: 'var(--text-secondary)', fontFamily: 'var(--sans)', marginTop: 14 }}>
+            <p style={{ marginBottom: 6 }}>
+              As confirmações serão recebidas até <strong style={{ color: 'var(--text)', textDecoration: 'underline', fontWeight: 700 }}>10 de outubro</strong>.
+            </p>
+            <p style={{ marginBottom: 6 }}>
+              Após essa data, não será possível incluir novas confirmações.
+            </p>
+            <p>
+              Em caso de imprevisto, pedimos a gentileza de nos avisar.
+            </p>
+          </div>
         </div>
 
         <div className="rsvp-card">
@@ -85,10 +93,18 @@ export default function RsvpSection({ guests, onUpdate }) {
               <h3 style={{ fontSize: '1.5rem', marginBottom: 8 }}>
                 {choice === 'confirmed' ? 'Presença Confirmada! 🎉' : 'Resposta Registrada'}
               </h3>
-              <p style={{ color: 'var(--text-secondary)', marginBottom: 24 }}>
-                {choice === 'confirmed'
-                  ? <>Que alegria, <strong>{guest?.name}</strong>! Estamos ansiosos para celebrar com você!</>
-                  : <>Obrigado por nos avisar, <strong>{guest?.name}</strong>. Sentiremos sua falta!</>}
+              <p style={{ color: 'var(--text-secondary)', marginBottom: 24, fontSize: 15, lineHeight: 1.7 }}>
+                {choice === 'confirmed' ? (
+                  <>
+                    Que alegria, <strong>{guest?.name}</strong>.<br />
+                    Estamos ansiosos para celebrar com você!
+                  </>
+                ) : (
+                  <>
+                    Obrigado por nos avisar, <strong>{guest?.name}</strong>.<br />
+                    Sentiremos sua falta!
+                  </>
+                )}
               </p>
               <div style={{ display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap' }}>
                 <a href="#detalhes" className="btn btn-outline btn-sm">Ver Local</a>

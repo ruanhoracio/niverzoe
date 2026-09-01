@@ -2,7 +2,7 @@ export const EVENT = {
   childName: "Zoe",
   age: "1º Aninho",
   title: "Zoe faz 1 aninho",
-  subtitle: "O nosso maior amor completa seu primeiro aninho de muitas alegrias.",
+  subtitle: "O nosso maior amor completa seu primeiro aninho.",
   date: "15 de Novembro de 2026",
   time: "15:30",
   iso: "2026-11-15T15:30:00-03:00",
