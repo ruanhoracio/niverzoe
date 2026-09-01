@@ -28,7 +28,7 @@ export default function Hero({ event }) {
     <section className="hero" id="hero">
       {/* Text content */}
       <div className="hero-top">
-        <div className="hero-eyebrow">Celebração Especial · {event.age}</div>
+        <div className="hero-eyebrow">Celebração Especial</div>
 
         <h1>
           Zoe faz <em>1 aninho.</em>
