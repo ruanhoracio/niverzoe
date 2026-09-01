@@ -60,7 +60,7 @@ export const GIFT_SUGGESTIONS = {
       icon: "HeartHandshake",
       size: "Poupança da Zoe",
       tip: "Chave PIX para quem preferir contribuir com a poupancinha da aniversariante",
-      pixKey: "" // Você pode preencher com sua chave PIX se desejar
+      pixKey: "karolayne.silveiraka@gmail.com"
     }
   ]
 };

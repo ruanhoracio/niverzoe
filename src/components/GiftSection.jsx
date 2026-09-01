@@ -8,7 +8,7 @@ export default function GiftSection() {
   const { intro, items } = GIFT_SUGGESTIONS;
 
   const pixItem = items.find(i => i.category.includes('PIX') || i.pixKey !== undefined);
-  const pixKey = pixItem?.pixKey || "pix@zoe1ano.com"; // Chave PIX configurável
+  const pixKey = pixItem?.pixKey || "karolayne.silveiraka@gmail.com";
 
   const copyPix = () => {
     navigator.clipboard.writeText(pixKey);
