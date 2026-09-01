@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Lock, Users, CheckCircle2, XCircle, Plus, Trash2, Download, Copy, Check, Share2, FileText, UserCheck, DollarSign, Baby } from 'lucide-react';
+import { X, Lock, Users, CheckCircle2, XCircle, Plus, Trash2, Download, Copy, Check, Share2, FileText, Edit3, Save } from 'lucide-react';
 
 export default function AdminModal({ isOpen, onClose, guests, onUpdate, onAdd, onDelete, onBatch, onReset, onClearAll, event }) {
   const [auth, setAuth] = useState(false);
@@ -9,13 +9,16 @@ export default function AdminModal({ isOpen, onClose, guests, onUpdate, onAdd, o
   const [filter, setFilter] = useState('all');
   const [groupFilter, setGroupFilter] = useState('all');
   const [name, setName] = useState('');
-  const [group, setGroup] = useState('Família');
+  const [group, setGroup] = useState('Família materna');
   const [tipo, setTipo] = useState('Individual');
   const [isAdult, setIsAdult] = useState(true);
   const [batch, setBatch] = useState('');
   const [batchGroup, setBatchGroup] = useState('Convidados');
   const [copied, setCopied] = useState(false);
   const [copiedShare, setCopiedShare] = useState(false);
+
+  // Estado para Edição do Convidado
+  const [editingGuest, setEditingGuest] = useState(null);
 
   if (!isOpen) return null;
 
@@ -47,6 +50,36 @@ export default function AdminModal({ isOpen, onClose, guests, onUpdate, onAdd, o
     const groupMatch = groupFilter === 'all' || g.group === groupFilter;
     return statusMatch && groupMatch;
   });
+
+  // Alternar rapidamente entre Pagante e Isento (<2 anos) com um clique na tabela
+  const togglePaying = (g) => {
+    const nextIsPaying = g.isPaying === false;
+    const updated = {
+      ...g,
+      isPaying: nextIsPaying,
+      adults: nextIsPaying ? 1 : 0,
+      kids: nextIsPaying ? 0 : 1,
+      kidsFree: nextIsPaying ? 0 : 1,
+      kidsPaying: 0,
+      updatedAt: new Date().toISOString()
+    };
+    onUpdate(updated);
+  };
+
+  // Alternar rapidamente status com um clique no badge de status
+  const cycleStatus = (g) => {
+    const order = ['pending', 'confirmed', 'declined'];
+    const currentIdx = order.indexOf(g.status || 'pending');
+    const nextStatus = order[(currentIdx + 1) % order.length];
+    onUpdate({ ...g, status: nextStatus, updatedAt: new Date().toISOString() });
+  };
+
+  const saveEditedGuest = (e) => {
+    e.preventDefault();
+    if (!editingGuest) return;
+    onUpdate({ ...editingGuest, updatedAt: new Date().toISOString() });
+    setEditingGuest(null);
+  };
 
   const addOne = (e) => {
     e.preventDefault();
@@ -151,7 +184,7 @@ export default function AdminModal({ isOpen, onClose, guests, onUpdate, onAdd, o
 
   return (
     <div className="overlay" onClick={onClose}>
-      <div className="modal" onClick={e => e.stopPropagation()} style={{ maxWidth: 960 }}>
+      <div className="modal" onClick={e => e.stopPropagation()} style={{ maxWidth: 980 }}>
         <button onClick={onClose} className="modal-close"><X size={16} /></button>
 
         {!auth ? (
@@ -287,7 +320,7 @@ export default function AdminModal({ isOpen, onClose, guests, onUpdate, onAdd, o
                   <button type="submit" className="btn btn-gold btn-sm"><Plus size={13} /> Adicionar</button>
                 </form>
 
-                {/* ─── Tabela Oficial de Convidados com Colunas da Planilha ─── */}
+                {/* ─── Tabela Oficial de Convidados com Edição Rápida e Direta ─── */}
                 <div style={{ overflowX: 'auto', maxHeight: 380, border: '1px solid var(--border)', borderRadius: 'var(--r-m)' }}>
                   <table className="tbl">
                     <thead>
@@ -295,7 +328,7 @@ export default function AdminModal({ isOpen, onClose, guests, onUpdate, onAdd, o
                         <th>Tipo</th>
                         <th>Nome Convidado</th>
                         <th>Categoria / Grupo</th>
-                        <th style={{ textAlign: 'center' }}>Pagante?</th>
+                        <th style={{ textAlign: 'center' }}>Pagante? (Clique p/ alternar)</th>
                         <th style={{ textAlign: 'center' }}>Status</th>
                         <th>Observações</th>
                         <th style={{ textAlign: 'center' }}>Ações</th>
@@ -307,30 +340,50 @@ export default function AdminModal({ isOpen, onClose, guests, onUpdate, onAdd, o
                           const isFreeKid = g.isPaying === false || g.kidsFree > 0;
                           return (
                             <tr key={g.id}>
-                              <td><span style={{ fontSize: 11, color: 'var(--text-tertiary)', textTransform: 'uppercase', fontWeight: 600 }}>{g.tipo || 'Individual'}</span></td>
+                              <td>
+                                <span style={{ fontSize: 11, color: 'var(--text-tertiary)', textTransform: 'uppercase', fontWeight: 600 }}>
+                                  {g.tipo || 'Individual'}
+                                </span>
+                              </td>
                               <td><strong>{g.name}</strong></td>
                               <td><span className="badge">{g.group}</span></td>
                               <td style={{ textAlign: 'center' }}>
-                                {isFreeKid ? (
-                                  <span style={{ fontSize: 11, background: '#E8EFEA', color: '#3B5949', padding: '3px 8px', borderRadius: 'var(--r-full)', fontWeight: 600 }}>
-                                    Isento (&lt; 2a)
-                                  </span>
-                                ) : (
-                                  <span style={{ fontSize: 11, background: 'var(--gold-bg)', color: 'var(--gold-dark)', padding: '3px 8px', borderRadius: 'var(--r-full)', fontWeight: 600 }}>
-                                    Pagante
-                                  </span>
-                                )}
+                                <button
+                                  type="button"
+                                  onClick={() => togglePaying(g)}
+                                  title="Clique para alternar entre Pagante e Isento (< 2 anos)"
+                                  style={{
+                                    border: 'none',
+                                    cursor: 'pointer',
+                                    fontSize: 11,
+                                    background: isFreeKid ? '#E8EFEA' : 'var(--gold-bg)',
+                                    color: isFreeKid ? '#3B5949' : 'var(--gold-dark)',
+                                    padding: '4px 10px',
+                                    borderRadius: 'var(--r-full)',
+                                    fontWeight: 600,
+                                    transition: 'all 0.2s'
+                                  }}
+                                >
+                                  {isFreeKid ? 'Isento (< 2a) 👶' : 'Pagante 💳'}
+                                </button>
                               </td>
                               <td style={{ textAlign: 'center' }}>
-                                <span className={`pill ${g.status === 'confirmed' ? 'pill-ok' : g.status === 'declined' ? 'pill-no' : 'pill-wait'}`}>
+                                <button
+                                  type="button"
+                                  onClick={() => cycleStatus(g)}
+                                  title="Clique para alternar o status de presença"
+                                  className={`pill ${g.status === 'confirmed' ? 'pill-ok' : g.status === 'declined' ? 'pill-no' : 'pill-wait'}`}
+                                  style={{ border: 'none', cursor: 'pointer' }}
+                                >
                                   {g.status === 'confirmed' ? '✅ Confirmado' : g.status === 'declined' ? '❌ Não irá' : '⏳ Pendente'}
-                                </span>
+                                </button>
                               </td>
-                              <td style={{ maxWidth: 180, fontSize: 12, color: 'var(--text-secondary)' }}>
+                              <td style={{ maxWidth: 160, fontSize: 12, color: 'var(--text-secondary)' }}>
                                 {g.msg ? <span style={{ fontStyle: 'italic', color: 'var(--text)' }}>💬 "{g.msg}"</span> : <span style={{ color: 'var(--text-tertiary)' }}>—</span>}
                               </td>
                               <td style={{ textAlign: 'center' }}>
-                                <div style={{ display: 'flex', gap: 4, justifyContent: 'center' }}>
+                                <div style={{ display: 'flex', gap: 6, justifyContent: 'center', alignItems: 'center' }}>
+                                  <button title="Editar Dados Completos" onClick={() => setEditingGuest(g)} style={{ border: 'none', background: 'none', cursor: 'pointer', color: 'var(--gold-dark)', padding: 3 }}><Edit3 size={15} /></button>
                                   <button title="Confirmar" onClick={() => onUpdate({ ...g, status: 'confirmed' })} style={{ border: 'none', background: 'none', cursor: 'pointer', color: 'var(--green)', padding: 3 }}><CheckCircle2 size={16} /></button>
                                   <button title="Recusar" onClick={() => onUpdate({ ...g, status: 'declined' })} style={{ border: 'none', background: 'none', cursor: 'pointer', color: 'var(--red)', padding: 3 }}><XCircle size={16} /></button>
                                   <button title="Excluir" onClick={() => { if (confirm(`Remover "${g.name}"?`)) onDelete(g.id); }} style={{ border: 'none', background: 'none', cursor: 'pointer', color: 'var(--text-tertiary)', padding: 3 }}><Trash2 size={16} /></button>
@@ -389,6 +442,112 @@ export default function AdminModal({ isOpen, onClose, guests, onUpdate, onAdd, o
                 </button>
               </div>
             )}
+          </div>
+        )}
+
+        {/* ─── Modal de Edição Detalhada do Convidado ─── */}
+        {editingGuest && (
+          <div className="overlay" style={{ zIndex: 1000, background: 'rgba(0,0,0,0.6)' }} onClick={() => setEditingGuest(null)}>
+            <div className="modal" style={{ maxWidth: 460, padding: 28 }} onClick={e => e.stopPropagation()}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18 }}>
+                <h3 style={{ fontSize: '1.25rem', margin: 0 }}>Editar Convidado</h3>
+                <button onClick={() => setEditingGuest(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)' }}><X size={18} /></button>
+              </div>
+
+              <form onSubmit={saveEditedGuest} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                <div className="field">
+                  <label>Nome do Convidado</label>
+                  <input
+                    value={editingGuest.name || ''}
+                    onChange={e => setEditingGuest({ ...editingGuest, name: e.target.value })}
+                    required
+                  />
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                  <div className="field">
+                    <label>Categoria / Grupo</label>
+                    <select
+                      value={editingGuest.group || 'Família materna'}
+                      onChange={e => setEditingGuest({ ...editingGuest, group: e.target.value })}
+                    >
+                      <option>Família materna</option>
+                      <option>Família paterna</option>
+                      <option>Padrinhos</option>
+                      <option>Igreja</option>
+                      <option>Trabalho</option>
+                      <option>Amigos</option>
+                      <option>Outros</option>
+                    </select>
+                  </div>
+
+                  <div className="field">
+                    <label>Tipo</label>
+                    <select
+                      value={editingGuest.tipo || 'Individual'}
+                      onChange={e => setEditingGuest({ ...editingGuest, tipo: e.target.value })}
+                    >
+                      <option>Individual</option>
+                      <option>Casal</option>
+                      <option>Família</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                  <div className="field">
+                    <label>Cobrança Buffet</label>
+                    <select
+                      value={editingGuest.isPaying === false ? 'free' : 'paying'}
+                      onChange={e => {
+                        const isPay = e.target.value === 'paying';
+                        setEditingGuest({
+                          ...editingGuest,
+                          isPaying: isPay,
+                          adults: isPay ? 1 : 0,
+                          kids: isPay ? 0 : 1,
+                          kidsFree: isPay ? 0 : 1,
+                          kidsPaying: 0
+                        });
+                      }}
+                    >
+                      <option value="paying">Pagante (Adulto / Criança 3+)</option>
+                      <option value="free">Isento (Criança &lt; 2 anos)</option>
+                    </select>
+                  </div>
+
+                  <div className="field">
+                    <label>Status de Presença</label>
+                    <select
+                      value={editingGuest.status || 'pending'}
+                      onChange={e => setEditingGuest({ ...editingGuest, status: e.target.value })}
+                    >
+                      <option value="pending">⏳ Pendente</option>
+                      <option value="confirmed">✅ Confirmado</option>
+                      <option value="declined">❌ Não irá</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="field">
+                  <label>Observação / Recado</label>
+                  <input
+                    placeholder="Ex: Chegará mais tarde, etc..."
+                    value={editingGuest.msg || ''}
+                    onChange={e => setEditingGuest({ ...editingGuest, msg: e.target.value })}
+                  />
+                </div>
+
+                <div style={{ display: 'flex', gap: 10, marginTop: 10 }}>
+                  <button type="button" onClick={() => setEditingGuest(null)} className="btn btn-outline" style={{ flex: 1 }}>
+                    Cancelar
+                  </button>
+                  <button type="submit" className="btn btn-gold" style={{ flex: 1.5 }}>
+                    <Save size={15} /> Salvar Alterações
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
         )}
       </div>
