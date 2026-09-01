@@ -42,7 +42,7 @@ export default function EventDetails({ event }) {
             <h3>Data & Horário</h3>
             <p>
               <strong style={{ color: 'var(--text)', fontSize: 15 }}>{event.date}</strong><br />
-              A partir das {event.time}
+              Às {event.time}
             </p>
             <div style={{ display: 'flex', gap: 8, width: '100%', marginTop: 'auto' }}>
               <a href={gcalUrl()} target="_blank" rel="noopener" className="btn btn-outline btn-sm" style={{ flex: 1, fontSize: 12 }}>
