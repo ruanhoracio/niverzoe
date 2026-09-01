@@ -6,34 +6,116 @@ import GiftSection from './components/GiftSection';
 import RsvpSection from './components/RsvpSection';
 import AdminModal from './components/AdminModal';
 import Footer from './components/Footer';
-import { EVENT, INITIAL_GUESTS } from './data/initialData';
+import { EVENT } from './data/initialData';
+import { 
+  supabase, 
+  getGuestsFromDb, 
+  upsertGuestToDb, 
+  batchUpsertGuestsToDb, 
+  deleteGuestFromDb, 
+  clearAllGuestsFromDb,
+  mapRowToGuest 
+} from './lib/supabase';
 
-const load = (key, fallback) => {
+const loadLocal = (key, fallback) => {
   try {
     const s = localStorage.getItem(key);
     if (!s) return fallback;
     const parsed = JSON.parse(s);
-    // Remove sample mock guests if they were stored previously
     return Array.isArray(parsed) ? parsed.filter(g => !['g1', 'g2', 'g3', 'g4', 'g5', 'g6'].includes(g.id)) : fallback;
   }
   catch { return fallback; }
 };
 
 export default function App() {
-  const [guests, setGuests] = useState(() => load('zoe_guests_live', []));
+  const [guests, setGuests] = useState(() => loadLocal('zoe_guests_live', []));
   const [admin, setAdmin] = useState(false);
 
-  useEffect(() => { localStorage.setItem('zoe_guests_live', JSON.stringify(guests)); }, [guests]);
+  // 1. Initial Load from Supabase on mount
+  useEffect(() => {
+    async function loadData() {
+      const dbGuests = await getGuestsFromDb();
+      if (dbGuests !== null) {
+        setGuests(dbGuests);
+        localStorage.setItem('zoe_guests_live', JSON.stringify(dbGuests));
+      }
+    }
+    loadData();
+  }, []);
 
-  const updateGuest = (g) => setGuests(prev => {
-    const exists = prev.some(x => x.id === g.id);
-    return exists ? prev.map(x => x.id === g.id ? g : x) : [g, ...prev];
-  });
-  const addGuest = (g) => setGuests(prev => [g, ...prev]);
-  const deleteGuest = (id) => setGuests(prev => prev.filter(g => g.id !== id));
-  const batchAdd = (items) => setGuests(prev => [...items, ...prev]);
-  const resetGuests = (items) => setGuests(items);
-  const clearAllGuests = () => setGuests([]);
+  // 2. Real-time subscription to database changes (sync across all phones/tablets)
+  useEffect(() => {
+    const channel = supabase
+      .channel('schema-db-changes')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'guests' },
+        (payload) => {
+          if (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE') {
+            const updated = mapRowToGuest(payload.new);
+            setGuests(prev => {
+              const exists = prev.some(x => x.id === updated.id);
+              const next = exists ? prev.map(x => x.id === updated.id ? updated : x) : [updated, ...prev];
+              localStorage.setItem('zoe_guests_live', JSON.stringify(next));
+              return next;
+            });
+          } else if (payload.eventType === 'DELETE') {
+            setGuests(prev => {
+              const next = prev.filter(x => x.id !== payload.old.id);
+              localStorage.setItem('zoe_guests_live', JSON.stringify(next));
+              return next;
+            });
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
+  // Sync state to local storage as fallback cache
+  useEffect(() => {
+    localStorage.setItem('zoe_guests_live', JSON.stringify(guests));
+  }, [guests]);
+
+  // Actions (Optimistic Local UI + Supabase Cloud Sync)
+  const updateGuest = async (g) => {
+    setGuests(prev => {
+      const exists = prev.some(x => x.id === g.id);
+      return exists ? prev.map(x => x.id === g.id ? g : x) : [g, ...prev];
+    });
+    await upsertGuestToDb(g);
+  };
+
+  const addGuest = async (g) => {
+    setGuests(prev => [g, ...prev]);
+    await upsertGuestToDb(g);
+  };
+
+  const deleteGuest = async (id) => {
+    setGuests(prev => prev.filter(g => g.id !== id));
+    await deleteGuestFromDb(id);
+  };
+
+  const batchAdd = async (items) => {
+    setGuests(prev => [...items, ...prev]);
+    await batchUpsertGuestsToDb(items);
+  };
+
+  const resetGuests = async (items) => {
+    setGuests(items);
+    await clearAllGuestsFromDb();
+    if (items.length > 0) {
+      await batchUpsertGuestsToDb(items);
+    }
+  };
+
+  const clearAllGuests = async () => {
+    setGuests([]);
+    await clearAllGuestsFromDb();
+  };
 
   return (
     <>
