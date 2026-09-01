@@ -202,7 +202,7 @@ export default function AdminModal({ isOpen, onClose, guests, onUpdate, onAdd, o
                 <p style={{ color: 'var(--text-secondary)', fontSize: 13, marginBottom: 14 }}>Cole os nomes do WhatsApp ou Bloco de Notas — um por linha.</p>
                 <div className="field">
                   <label>Nomes (1 por linha)</label>
-                  <textarea rows={8} placeholder={"Vovô Roberto & Vovó Maria\nTia Camila\nLucas & Mariana\n..."} value={batch} onChange={e => setBatch(e.target.value)} style={{ fontFamily: 'monospace', fontSize: 13 }} />
+                  <textarea rows={8} placeholder={"Nome do Convidado ou Família\nNome 2\nNome 3\n..."} value={batch} onChange={e => setBatch(e.target.value)} style={{ fontFamily: 'monospace', fontSize: 13 }} />
                 </div>
                 <div className="field">
                   <label>Grupo</label>

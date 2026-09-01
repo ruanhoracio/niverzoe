@@ -68,7 +68,7 @@ export default function RsvpSection({ guests, onUpdate }) {
         <div style={{ textAlign: 'center', marginBottom: 40 }}>
           <div className="section-label">Sua presença é essencial</div>
           <h2 className="section-title">Confirmação de Presença</h2>
-          <p className="section-desc">Confirme até 05 de Novembro para que possamos preparar tudo com carinho.</p>
+          <p className="section-desc">Confirme até 10 de Outubro para que possamos preparar tudo com carinho.</p>
         </div>
 
         <div className="rsvp-card">
@@ -108,7 +108,7 @@ export default function RsvpSection({ guests, onUpdate }) {
                     <Search className="search-icon" size={18} />
                     <input
                       className="search-input"
-                      placeholder="Ex: Ruan, Família Horacio, Lucas..."
+                      placeholder="Digite seu nome ou família..."
                       value={q}
                       onChange={(e) => { setQ(e.target.value); setOpen(true); }}
                       onFocus={() => setOpen(true)}
