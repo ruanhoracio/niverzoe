@@ -394,8 +394,8 @@ export default function RsvpSection({ guests, onUpdate, onUpdateMultiple }) {
                   </button>
                 </form>
               ) : (
-                <div style={{ textAlign: 'center', padding: '14px 0 6px', color: 'var(--text-secondary)', fontSize: 13 }}>
-                  👆 Digite seu nome acima e marque as pessoas que deseja confirmar juntas.
+                <div style={{ textAlign: 'center', padding: '14px 10px 6px', color: 'var(--text-secondary)', fontSize: 13.5, lineHeight: 1.6 }}>
+                  👆 Digite seu nome e o nome dos familiares que deseja confirmar junto (filhos, cônjuge e/ou namorado(a)).
                 </div>
               )}
             </div>
