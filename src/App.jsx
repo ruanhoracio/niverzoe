@@ -6,7 +6,7 @@ import GiftSection from './components/GiftSection';
 import RsvpSection from './components/RsvpSection';
 import AdminModal from './components/AdminModal';
 import Footer from './components/Footer';
-import { EVENT } from './data/initialData';
+import { EVENT, INITIAL_GUESTS } from './data/initialData';
 import { 
   supabase, 
   getGuestsFromDb, 
@@ -22,13 +22,15 @@ const loadLocal = (key, fallback) => {
     const s = localStorage.getItem(key);
     if (!s) return fallback;
     const parsed = JSON.parse(s);
-    return Array.isArray(parsed) ? parsed.filter(g => !['g1', 'g2', 'g3', 'g4', 'g5', 'g6'].includes(g.id)) : fallback;
+    return Array.isArray(parsed) && parsed.length > 0 
+      ? parsed.filter(g => !['g1', 'g2', 'g3', 'g4', 'g5', 'g6'].includes(g.id)) 
+      : fallback;
   }
   catch { return fallback; }
 };
 
 export default function App() {
-  const [guests, setGuests] = useState(() => loadLocal('zoe_guests_live', []));
+  const [guests, setGuests] = useState(() => loadLocal('zoe_guests_live', INITIAL_GUESTS));
   const [admin, setAdmin] = useState(false);
 
   // 1. Initial Load from Supabase on mount

@@ -28,8 +28,10 @@ export const ALL_PHOTOS = [
 // Best picks for hero carousel
 export const HERO_PHOTOS = ALL_PHOTOS;
 
-// Zerado conforme solicitado
-export const INITIAL_GUESTS = [];
+import importedGuestsList from './importedGuests.json';
+
+// Lista oficial importada da planilha Zoe .xlsx
+export const INITIAL_GUESTS = importedGuestsList;
 
 export const INITIAL_MESSAGES = [];
 
