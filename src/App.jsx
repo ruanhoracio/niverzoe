@@ -91,6 +91,14 @@ export default function App() {
     await upsertGuestToDb(g);
   };
 
+  const updateMultipleGuests = async (guestsList) => {
+    setGuests(prev => {
+      const map = new Map(guestsList.map(g => [g.id, g]));
+      return prev.map(x => map.has(x.id) ? map.get(x.id) : x);
+    });
+    await batchUpsertGuestsToDb(guestsList);
+  };
+
   const addGuest = async (g) => {
     setGuests(prev => [g, ...prev]);
     await upsertGuestToDb(g);
@@ -125,7 +133,7 @@ export default function App() {
       <main>
         <Hero event={EVENT} />
         <EventDetails event={EVENT} />
-        <RsvpSection guests={guests} onUpdate={updateGuest} />
+        <RsvpSection guests={guests} onUpdate={updateGuest} onUpdateMultiple={updateMultipleGuests} />
         <GiftSection />
       </main>
       <Footer onAdmin={() => setAdmin(true)} />
